@@ -1,0 +1,46 @@
+FROM --platform=linux/amd64 centos:7
+LABEL Ricardo Faria <ricardo88faria@gmail.com>
+
+#
+# Set up base OS environment
+#
+RUN yum -y update
+RUN yum -y install glibc-langpack-en sudo file libpng-devel nano python3 \
+    hostname m4 make perl tar bash tcsh time wget which git cmake pkgconfig libxml2-devel libcurl-devel \
+    openssh-clients openssh-server net-tools fontconfig libXext libXrender ImageMagick epel-release
+RUN yum -y groupinstall "Development Tools"
+
+#
+# Create user
+#
+RUN useradd -m swe
+RUN echo "swe ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/swe
+USER swe
+WORKDIR /home/swe
+
+#
+# setup environment
+#
+ENV HOME /home/swe
+ENV LANG en_US.UTF-8
+ENV LANGUAGE en_US:en
+ENV LC_ALL en_US.UTF-8
+RUN echo "alias cp='cp -iv'" >> ~/.bashrc && \
+    echo "alias mv='mv -iv'" >> ~/.bashrc && \
+    echo "alias mkdir='mkdir -pv'" >> ~/.bashrc && \
+    echo "alias ll='ls -FGlAhp'" >> ~/.bashrc
+
+#
+# compile intel one api
+#
+COPY l_HPCKit_p_2021.4.0.3347_offline.sh /home/swe/l_HPCKit_p_2021.4.0.3347_offline.sh
+# RUN sudo chmod +x /home/swe/l_HPCKit_p_2021.4.0.3347_offline.sh
+# RUN sudo bash /home/swe/l_HPCKit_p_2021.4.0.3347_offline.sh -a --silent --eula accept
+# RUN echo "source /opt/intel/oneapi/setvars.sh" >> ~/.bashrc
+
+#
+# Install WRF and its dependencies
+#
+COPY install_libs_wrf.sh /home/swe/install_libs_wrf.sh
+# RUN sudo chmod +x /home/swe/install_libs_wrf.sh
+# RUN sudo bash /home/swe/install_libs_wrf.sh
